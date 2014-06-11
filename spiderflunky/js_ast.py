@@ -18,6 +18,7 @@ class Node(dict):
 
     def walk_down(self, skip=lambda n: False, include_self=True):
         """Yield each (depth, node) from here downward, myself included, in depth-first
+        added more Node types and depth to walking down
         pre-order.
 
         :arg skip: A predicate decribing nodes to not descend into. We always
@@ -32,6 +33,7 @@ class Node(dict):
         """
         if include_self:
             yield 0, self
+
         for child in self.children():
             if not skip(child):
                 # Just a "yield from":
@@ -41,6 +43,7 @@ class Node(dict):
     def _children(self):
         # fail, there is no generic body attr.
         raise NotImplementedError
+
 
     def children(self):
         """Return my children, accounting for variations in where children are
