@@ -94,10 +94,17 @@ class VariableDeclaration(Node):
     def _children(self):
         return self['declarations']
 
+class EmptyStatement(Node):
+    def _children(self):
+        return None
 
 class ExpressionStatement(Node):
     def _children(self):
         return [self['expression']]
+
+class BlockStatement(Node):
+    def _children(self):
+        return self['body']
 
 class AssignmentExpression(Node):
     def _children(self):
@@ -111,6 +118,58 @@ class IfStatement(Node):
             ret.append(self['alternate'])
         return ret
 
+class LabeledStatement(Node):
+    def _children(self):
+        return [self['body']]
+
+class BreakStatement(Node):
+    def _children(self):
+        return None
+
+class ContinueStatement(Node):
+    def _children(self):
+        return None
+
+class WithStatement(Node):
+    def _children(self):
+        return [self['body'], self['object']]
+
+class SwitchStatement(Node):
+    def _children(self):
+        return [self['discriminant']] + self['cases'] + [self['lexical']]
+
+class ThrowStatement(Node):
+    def _children(self):
+        return [self['argument']]
+
+class ReturnStatement(Node):
+    def _children(self):
+        return [self['argument']]
+
+class TryStatement(Node):
+    def _children(self):
+        return [self['block'], self['handler']] + self['guardedHandlers'] + [self['finalizer']]
+
+class WhileStatement(Node):
+    def _children(self):
+        return [self['test'], self['body']]
+
+class DoWhileStatement(Node):
+    def _children(self):
+        return [self['body'], self['test']]
+
+class ForStatement(Node):
+    def _children(self):
+        return [self['init'], self['test'], self['update'], self['body']]
+
+class ForInStatement(Node):
+    def _children(self):
+        return [self['left'], self['right'],  self['body'], self['each']]
+
+class ForOfStatement(Node):
+    def _children(self):
+        return [self['left'], self['right'], self['body']]
+
 class Identifier(Node):
     def _children(self):
         return None
@@ -118,6 +177,8 @@ class Identifier(Node):
 class Literal(Node):
     def _children(self):
         return None
+
+
 
 class FunctionDeclaration(Node):
     def scope(self):
@@ -137,7 +198,7 @@ class FunctionDeclaration(Node):
         return self['_scope']
 
     def _children(self):
-        raise NotImplementedError
+        raise NotImplementedError(self['type'])
 
 
 class Program(Node):
