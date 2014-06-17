@@ -9,9 +9,44 @@ from parsimonious.nodes import NodeVisitor
 from parsimonious.exceptions import ParseError
 from more_itertools import first
 from toposort import toposort_flatten
-from itertools import repeat
+from itertools import islice
 import sys
 import pkg_resources
+from networkx import DiGraph
+import networkx as nx
+
+class JsAst(DiGraph):
+    def __init__(self, root):
+        DiGraph.__init__(self)
+        self.root = root
+        self.add_node(root)
+        queue = [root]
+        while queue:
+            parent = queue.pop()
+            for node in parent.children():
+                self.add_edge(parent, node)
+            queue.extend(parent.children())
+
+    def parent(self, node):
+        predecessors = self.predecessors(node)
+        return predecessors[0] if predecessors else None
+
+    def walk_up(self, start):
+        """Yield each node from here to the root of the tree, starting with
+        myself."""
+        node = start
+        while node:
+            yield node
+            node = self.parent(node)
+
+    def walk_down(self, root=None):
+        """Yield each node from here downward, myself included,
+        in depth-first pre-order.
+
+        :arg include_self: A flag for including the root in the walk down.
+
+        """
+        return nx.traversal.dfs_preorder_nodes(self, root)
 
 
 class BaseNode(dict):
@@ -21,40 +56,8 @@ class BaseNode(dict):
     Importing a zillion helper functions into every module is a pain.
 
     """
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
-        self.parent = parent
-
-    def walk_up(self):
-        """Yield each node from here to the root of the tree, starting with
-        myself."""
-        node = self
-        while node:
-            yield node
-            node = node.parent
-
-    def walk_down(self, skip=lambda n: False, include_self=True):
-        """Yield each node from here downward, myself included,
-        in depth-first pre-order.
-
-        :arg skip: A predicate decribing nodes to not descend into. We always
-            return ourselves, even if the predicate says to skip us.
-        :arg include_self: A flag for including the root in the walk down.
-
-        The AST we get from Reflect.parse is somewhat unsatisfying. It's not a
-        uniform tree shape; it seems to have already been turned into more
-        specialized objects. Thus, we have to traverse into different fields
-        depending on node type.
-
-        """
-        if include_self:
-            yield self
-        for child in self.children():
-            if skip(child):
-                continue
-            # Just a "yield from":
-            for ret in child.walk_down(skip=skip):
-                yield ret
 
     def _children(self):
         return []
@@ -109,6 +112,9 @@ class BaseNode(dict):
 
         """
         return set()
+
+    def __hash__(self):
+        return id(self)
 
 
 def _clean(text):
@@ -194,7 +200,9 @@ def _node_class_factory(class_map, name, parents, fields):
                              _flatten((self[f] for f in fields)))
         return fields_vals
 
-    __dict__ = {'_children': _children}
+    __dict__ = {
+        '_children': _children,
+        '__repr__': lambda self: name}
     if "params" in fields:
         __dict__['scope'] = function_scope
 
@@ -202,16 +210,12 @@ def _node_class_factory(class_map, name, parents, fields):
     return type(str(name), bases, __dict__)
 
 
-def set_parents(root):
+def make_graph(root):
     """Sets the parent attribute for all nodes in the tree.
     Root's parent is None
 
     """
-    queue = [(root, None)]
-    while queue:
-        node, parent = queue.pop()
-        node.parent = parent
-        queue.extend(zip(node.children(), repeat(node)))
+
 
 
 API_GRAMMAR = r"""
@@ -283,7 +287,7 @@ def node_hook(json_dict):
     """This is a object hook for the json loads function.
 
     """
-    return CLASS_MAP.get(json_dict.get('type'), BaseNode)(None, json_dict)
+    return CLASS_MAP.get(json_dict.get('type'), BaseNode)(json_dict)
 
 # Inject classes from spec into module
 PARSER_API_HTM = pkg_resources.resource_string(__name__, "Parser_API.htm")

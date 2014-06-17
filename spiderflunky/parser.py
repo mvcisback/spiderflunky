@@ -3,7 +3,7 @@ import os
 import re
 import subprocess
 import tempfile
-from .js_ast import node_hook, set_parents
+from .js_ast import node_hook, JsAst
 import simplejson as json
 from functools import partial
 
@@ -87,7 +87,7 @@ def raw_parse(code, object_hook, shell):
                     raise JsReflectException(parsed["error_message"],
                                              line=parsed["line_number"])
         else:
-            set_parents(parsed)
+            return JsAst(parsed)
 
         # Closing the temp file will delete it.
     finally:
@@ -96,7 +96,6 @@ def raw_parse(code, object_hook, shell):
             os.unlink(temp.name)
         except IOError:
             pass
-    return parsed
 
 
 JS_ESCAPE = re.compile("\\\\+[ux]", re.I)
