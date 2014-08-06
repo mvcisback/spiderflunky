@@ -3,8 +3,6 @@ from parsimonious.nodes import NodeVisitor
 
 
 TYPESCRIPT_GRAMMAR = Grammar(r"""
-    start = declaration_source_file
-
     ident = ~r"[\w\.\?]+"
     str_lit = "TODO"
     num_lit = "TODO"
@@ -39,13 +37,15 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
                  / (optional_param_list _ "," _ "rest_param")
                  / (required_parm_list _ "," _ optional_param_list _ "," _ rest_param)
 
-    required_parm_list = "TODO"
-    optional_param_list = "TODO"
-    rest_param = "TODO"
+    required_parm_list = (public_or_private? _ ident _ type_annotation?) / (ident _ ":" _ str_lit)
+    optional_param_list = public_or_private? _ ident _ (("?" _ type_annotation?) / (type_annotation? _ initialiser))
+        initialiser = "TODO"
+    rest_param = "..." _ ident type_annotation?
 
     call_sig = type_params? "(" param_list ")" type_annotation?
     func_type = type_params _ "(" _ param_list _ ")" _ "=>" type
     constr_sig = "new" _ type_params? _ "(" _ param_list? _ ")" _ type_annotation?
+        type_params = "<" _ type_param+ _ ">"
 
     index_sig = "[" _ ident _ ":" _ ("string" / "number") _ "]" _ type_annotation
     method_sig = prop_name "?"? call_sig
@@ -54,7 +54,7 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
     type_query_expr = ident ("." ident)*
     type_args = type_arg+
     type_arg = type _ (_ "," _)?
-    type_params = "<" _ type_param+ _ ">"
+    
     type_param = ident _ (constraint)? (_ "," _)?
     type_annotation = "TODO"
     constraint = "extends" type
@@ -122,8 +122,9 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
     _ = ~r"\s*"
     __ = ~r"\s+"
     space = !(~r"[\n\r]") ~r"\s"
-""")
+""", "declaration_source_file")
 
 
 def parse(lines):
-    raise NotImplementedError
+    TYPESCRIPT_GRAMMAR.parse(lines)
+
