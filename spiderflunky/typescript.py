@@ -70,28 +70,38 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
         entity_name = ident (( "." ident)?)+
     export_assignment = "export" _ "=" ident _ ";"
     ambient_decl = "declare" _ ambient_decls
-        ambient_decls = ambient_var_decls
-                      / ambient_func_decls
-                      / ambient_class_decls
-                      / ambient_enum_decls
-                      / ambient_module_decls
-                      / ambient_extern_module_decls
-        ambient_var_decls = "var" _ ident _ type_annotation? _ ";"
-        ambient_func_decls = "function" _ ident _ call_sig _ ";"
-        ambient_class_decls = "class" _ ident _ type_params? class_heritage "{" _ ambient_class_body _ "}"
+        ambient_decls = ambient_var_decl
+                      / ambient_func_decl
+                      / ambient_class_decl
+                      / ambient_enum_decl
+                      / ambient_module_decl
+                      / ambient_extern_module_decl
+        ambient_var_decl = "var" _ ident _ type_annotation? _ ";"
+        ambient_func_decl = "function" _ ident _ call_sig _ ";"
+        ambient_class_decl = "class" _ ident _ type_params? class_heritage "{" _ ambient_class_body _ "}"
             ambient_class_body = ambient_class_body_elem*
             ambient_class_body_elem = ambient_constr_decl / ambient_prop_member_decl / index_sig
                  ambient_constr_decl = "constructor" _ "(" _ param_list? _ ")" _ ";"
                  ambient_prop_member_decl = public_or_private? "static"? prop_name ((type_annotation?)
                                                                                    / call_sig) ";"
                  
-       ambient_enum_decls = "enum" _ ident _ "{" _ ambient_enum_body _ "}"
+       ambient_enum_decl = "enum" _ ident _ "{" _ ambient_enum_body _ "}"
            ambient_enum_body = ambient_enum_member_list _ ","?
            ambient_enum_member_list = ambient_enum_member (_ "," _ ambient_enum_member)*
            ambient_enum_member = prop_name (_ "=" _ num_lit)?
-       ambient_module_decls = "module" _ ident_path _ "{" _ ambient_module_body _ "}"
-           ambient_module_body = "TODO"
-       ambient_extern_module_decls = "TODO"
+       ambient_module_decl = "module" _ ident_path _ "{" _ ambient_module_body _ "}"
+           ambient_module_body = ambient_module_elem*
+           ambient_module_elem = "export"? _ambient_module_decl
+           _ambient_module_decl = ambient_var_decl
+                                / ambient_func_decl
+                                / ambient_class_decl
+                                / interface_decl
+                                / ambient_enum_decl
+                                / ambient_module_decl
+                                / import_decl
+
+
+       ambient_extern_module_decl = "TODO"
 
     class_heritage = "TODO"
 
