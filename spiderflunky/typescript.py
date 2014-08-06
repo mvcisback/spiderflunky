@@ -20,10 +20,10 @@ API_GRAMMAR = Grammar(r"""
     type_var = ~r"\w+" (_ "," _) ?
     kind = "module"
 
-    line_comment = "//" line_comment_char+ ("\n")?
-    line_comment_char = !("\n") ~r"."
+    line_comment = "//" line_comment_char+
+    line_comment_char = ~r"."
     block_comment = "/*" block_comment_char+ "*/"
-    block_comment_char = !("*/") ~r"."
+    block_comment_char = !("*/") ~r"."s
 
     sep = ":" / "=>"
 
