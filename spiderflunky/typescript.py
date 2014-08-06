@@ -2,7 +2,7 @@ from parsimonious.grammar import Grammar
 from parsimonious.nodes import NodeVisitor
 
 
-API_GRAMMAR = Grammar(r"""
+TYPESCRIPT_GRAMMAR = Grammar(r"""
     comment = block_comment / line_comment
     sigs = (sig (_ ";")?)+
     sig = ("static"? _ ident _)? lambda
