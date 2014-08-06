@@ -6,8 +6,8 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
     start = declaration_source_file
 
     ident = ~r"[\w\.\?]+"
-    str_lit = '"' (!('"') ~r"."s) '"' # FIXME
-    num_lit = [+-]?[0-9]("." [0-9]+)? # FIXME
+    str_lit = "TODO"
+    num_lit = "TODO"
 
     comment = block_comment / line_comment
     line_comment = "//" line_comment_char+
