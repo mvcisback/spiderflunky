@@ -56,7 +56,7 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
     type_arg = type _ (_ "," _)?
     
     type_param = ident _ (constraint)? (_ "," _)?
-    type_annotation = "TODO"
+    type_annotation = ":" _ type
     constraint = "extends" type
 
     declaration_source_file = (declaration_element+)?
