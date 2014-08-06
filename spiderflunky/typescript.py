@@ -106,7 +106,11 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
                                       / export_assignment
                                       / ("export"? external_import_decl)
 
-    class_heritage = "TODO"
+    class_heritage = class_extends_clause? implements_clause?
+        class_extends_clause = "extends" _ class_type
+            class_type = type_ref
+        implements_clause = "implements" _ class_or_interface_type_list
+        class_or_interface_type_list = type_ref (_ ", " _ type_ref)*
 
     interface_decl = "interface" ident type_params? interface_extends_clause? obj_type
         interface_extends_clause = "extends" (_ type_ref _ (",")?)*
