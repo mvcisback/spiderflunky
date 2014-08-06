@@ -3,7 +3,8 @@ from parsimonious.nodes import NodeVisitor
 
 
 TYPESCRIPT_GRAMMAR = Grammar(r"""
-    start = func_type
+    start = declaration_source_file
+
     ident = ~r"[\w\.\?]+"
     str_lit = "TODO"
     num_lit = "TODO"
@@ -28,6 +29,7 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
     type_member = (prop_sig / call_sig / constr_sig/ index_sig / method_sig) (_ ";")?
     prop_sig = prop_name "?"? type_annotation?
     prop_name = ident / str_lit / num_lit
+    public_or_private = "public" / "private"
     
     param_list = required_parm_list
                  / optional_param_list
@@ -37,11 +39,9 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
                  / (optional_param_list _ "," _ "rest_param")
                  / (required_parm_list _ "," _ optional_param_list _ "," _ rest_param)
 
-
     required_parm_list = "TODO"
     optional_param_list = "TODO"
     rest_param = "TODO"
-
 
     call_sig = type_params? "(" param_list ")" type_annotation?
     func_type = type_params _ "(" _ param_list _ ")" _ "=>" type
@@ -58,7 +58,6 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
     type_param = ident _ (constraint)? (_ "," _)?
     type_annotation = "TODO"
     constraint = "extends" type
-
 
     declaration_source_file = (declaration_element+)?
     declaration_element = export_assignment / ("export"? decls)
@@ -81,13 +80,26 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
         ambient_func_decls = "function" _ ident _ call_sig _ ";"
         ambient_class_decls = "class" _ ident _ type_params? class_heritage "{" _ ambient_class_body _ "}"
             ambient_class_body = ambient_class_body_elem*
-            ambient_class_body_elem = "TODO"
+            ambient_class_body_elem = ambient_constr_decl / ambient_prop_member_decl / index_sig
+                 ambient_constr_decl = "constructor" _ "(" _ param_list? _ ")" _ ";"
+                 ambient_prop_member_decl = public_or_private? "static"? prop_name ((type_annotation?)
+                                                                                   / call_sig) ";"
+                 
+       ambient_enum_decls = "enum" _ ident _ "{" _ ambient_enum_body _ "}"
+           ambient_enum_body = ambient_enum_member_list _ ","?
+           ambient_enum_member_list = ambient_enum_member (_ "," _ ambient_enum_member)*
+           ambient_enum_member = prop_name (_ "=" _ num_lit)?
+       ambient_module_decls = "module" _ ident_path _ "{" _ ambient_module_body _ "}"
+           ambient_module_body = "TODO"
+       ambient_extern_module_decls = "TODO"
 
     class_heritage = "TODO"
 
     interface_decl = "interface" ident type_params? interface_extends_clause? obj_type
         interface_extends_clause = "extends" (_ type_ref _ (",")?)*
    
+
+    ident_path = "ident" ("." ident)*
 
     sep = ":" / "=>"
 
