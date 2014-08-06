@@ -29,16 +29,19 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
     prop_name = ident / str_lit / num_lit
     public_or_private = "public" / "private"
     
-    param_list = required_parm_list
-                 / optional_param_list
-                 / rest_param
-                 / (required_parm_list _ "," _ optional_param_list)
-                 / (required_parm_list _ "," _ rest_param)
-                 / (optional_param_list _ "," _ "rest_param")
-                 / (required_parm_list _ "," _ optional_param_list _ "," _ rest_param)
+    param_list = required_param_list
+               / optional_param_list
+               / rest_param
+               / (required_param_list _ "," _ optional_param_list)
+               / (required_param_list _ "," _ rest_param)
+               / (optional_param_list _ "," _ "rest_param")
+               / (required_param_list _ "," _ optional_param_list _ "," _ rest_param)
 
-    required_parm_list = (public_or_private? _ ident _ type_annotation?) / (ident _ ":" _ str_lit)
-    optional_param_list = public_or_private? _ ident _ (("?" _ type_annotation?) / (type_annotation? _ initialiser))
+    required_param_list = required_param (_ "," _ required_param)*
+    required_param = (public_or_private? _ ident _ type_annotation?)
+                   / (ident _ ":" _ str_lit)
+    optional_param_list = optional_param (_ "," _ optional_param)*
+    optional_param = public_or_private? _ ident _ (("?" _ type_annotation?) / (type_annotation? _ initialiser))
         initialiser = "TODO"
     rest_param = "..." _ ident type_annotation?
 
