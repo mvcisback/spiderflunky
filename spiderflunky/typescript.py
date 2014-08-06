@@ -91,7 +91,6 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
            ambient_enum_member = prop_name (_ "=" _ num_lit)?
        ambient_module_decl = "module" _ ident_path _ "{" _ ambient_module_body _ "}"
            ambient_module_body = ambient_module_elem*
-           ambient_module_elem = "export"? _ambient_module_decl
            _ambient_module_decl = ambient_var_decl
                                 / ambient_func_decl
                                 / ambient_class_decl
@@ -100,14 +99,17 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
                                 / ambient_module_decl
                                 / import_decl
 
-
-       ambient_extern_module_decl = "TODO"
+       ambient_module_elem = "export"? _ambient_module_decl
+       ambient_extern_module_decl = "module" _ str_lit _ "{" ambient_extern_module_body "}"
+           ambient_extern_module_body = ambient_extern_module_elem*
+           ambient_extern_module_elem = ambient_module_elem
+                                      / export_assignment
+                                      / ("export"? external_import_decl)
 
     class_heritage = "TODO"
 
     interface_decl = "interface" ident type_params? interface_extends_clause? obj_type
         interface_extends_clause = "extends" (_ type_ref _ (",")?)*
-   
 
     ident_path = "ident" ("." ident)*
 
