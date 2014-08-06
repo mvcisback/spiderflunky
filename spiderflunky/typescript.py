@@ -68,10 +68,25 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
     external_module_ref = "require" _ "(" _ str_lit _ ")"
 
     import_decl = "import" _ ident _ "=" _ entity_name _ ";"
+        entity_name = ident (( "." ident)?)+
     export_assignment = "export" _ "=" ident _ ";"
-    import_decl = "TODO"
-    ambient_decl = "TODO"
-    interface_decl = "TODO"
+    ambient_decl = "declare" _ ambient_decls
+        ambient_decls = ambient_var_decls
+                      / ambient_func_decls
+                      / ambient_class_decls
+                      / ambient_enum_decls
+                      / ambient_module_decls
+                      / ambient_extern_module_decls
+        ambient_var_decls = "var" _ ident _ type_annotation? _ ";"
+        ambient_func_decls = "function" _ ident _ call_sig _ ";"
+        ambient_class_decls = "class" _ ident _ type_params? class_heritage "{" _ ambient_class_body _ "}"
+            ambient_class_body = ambient_class_body_elem*
+            ambient_class_body_elem = "TODO"
+
+    class_heritage = "TODO"
+
+    interface_decl = "interface" ident type_params? interface_extends_clause? obj_type
+        interface_extends_clause = "extends" (_ type_ref _ (",")?)*
    
 
     sep = ":" / "=>"
