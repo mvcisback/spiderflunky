@@ -3,14 +3,16 @@ from parsimonious.nodes import NodeVisitor
 
 
 TYPESCRIPT_GRAMMAR = Grammar(r"""
-    ident = ~r"[\w\.\?]+"
+    ident = ~r"[\w\.\?]+" # TODO really implement
+
     str_lit = ('"' double_str_char* '"') / ("'" single_str_char* "'")
-        double_str_char = (!(~r'["\\]') !line_terminator source_char)
-                        / "\\" escape_seq
+        double_str_char = (!('"') !break_char source_char)
+                         / str_char_common
+        single_str_char = (!('"') !break_char source_char)
+                        / str_char_common
+        str_char_common = ("\\" escape_seq)
                         / line_continuation
-        single_str_char = (!(~r"[']") !line_terminator source_char)
-                        / "\\" escape_seq
-                        / line_continuation
+        break_char = "\\" / line_terminator
         line_continuation = "\\" line_terminator_sequence
         escape_seq = char_escape_sequence
                    / "TODO lookahead" 
@@ -26,8 +28,13 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
         hex_escape_seq = "x" hex_digit hex_digit
         unicode_escape_seq = "u" hex_digit hex_digit hex_digit hex_digit
         source_char = ~r"."
-        hex_digit = [0-9a-eA-F]
-        decimal_digit = [0-9]
+        hex_digit = ~r"[0-9a-eA-F]"
+        decimal_digit = ~r"[0-9]"
+        line_terminator = "\n" / "\r" / LS / PS
+        line_terminator_sequence =  "\r\n" / "\r" / "\n" / LS / PS
+        LS = "\u2028" # TODO can't prefix with u
+        PS = "\u2029"
+        char_escape_sequence = single_escape_char / non_escape_char
 
     num_lit = "TODO"
 
