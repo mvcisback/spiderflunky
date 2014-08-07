@@ -4,7 +4,31 @@ from parsimonious.nodes import NodeVisitor
 
 TYPESCRIPT_GRAMMAR = Grammar(r"""
     ident = ~r"[\w\.\?]+"
-    str_lit = "TODO"
+    str_lit = ('"' double_str_char* '"') / ("'" single_str_char* "'")
+        double_str_char = (!(~r'["\\]') !line_terminator source_char)
+                        / "\\" escape_seq
+                        / line_continuation
+        single_str_char = (!(~r"[']") !line_terminator source_char)
+                        / "\\" escape_seq
+                        / line_continuation
+        line_continuation = "\\" line_terminator_sequence
+        escape_seq = char_escape_sequence
+                   / "TODO lookahead" 
+                   / hex_escape_seq
+                   / unicode_escape_seq
+        char_escape_seq = single_escape_char
+                        / non_escape_char
+        single_escape_char = ~r"['\"\\bfnrtv]"
+        non_escape_char = !escape_char !line_terminator source_char
+        escape_char = single_escape_char
+                    / decimal_digit
+                    / "x" / "u"
+        hex_escape_seq = "x" hex_digit hex_digit
+        unicode_escape_seq = "u" hex_digit hex_digit hex_digit hex_digit
+        source_char = ~r"."
+        hex_digit = [0-9a-eA-F]
+        decimal_digit = [0-9]
+
     num_lit = "TODO"
 
     comment = block_comment / line_comment
