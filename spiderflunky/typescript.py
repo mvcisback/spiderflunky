@@ -28,15 +28,24 @@ TYPESCRIPT_GRAMMAR = Grammar(r"""
         hex_escape_seq = "x" hex_digit hex_digit
         unicode_escape_seq = "u" hex_digit hex_digit hex_digit hex_digit
         source_char = ~r"."
-        hex_digit = ~r"[0-9a-eA-F]"
-        decimal_digit = ~r"[0-9]"
+        
         line_terminator = "\n" / "\r" / LS / PS
         line_terminator_sequence =  "\r\n" / "\r" / "\n" / LS / PS
         LS = "\u2028" # TODO can't prefix with u
         PS = "\u2029"
         char_escape_sequence = single_escape_char / non_escape_char
 
-    num_lit = "TODO"
+    hex_digit = ~r"[0-9a-eA-F]"
+    decimal_digit = ~r"[0-9]"
+    num_lit = decimal_lit / hex_int_lit
+    decimal_lit = (decimal_int_lit "." decimal_digit* exponent_part?)
+                / ("." decimal_digit+ exponent_part?)
+                / (decimal_int_lit exponent_part?)
+        decimal_int_lit = "0" / (~r"[1-9]" decimal_digit*)
+        decimal_digit = ~r"[0-9]"
+        exponent_part = ("e" / "E") signed_int
+        signed_int = ("+" / "-")? decimal_digit+
+        hex_int_lit = "0x" hex_digit
 
     comment = block_comment / line_comment
     line_comment = "//" line_comment_char+
